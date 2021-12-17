@@ -7,12 +7,12 @@ import { useDrawers } from '@common/hooks/use-drawers';
 import { useNextTxNonce } from '@common/hooks/account/use-next-tx-nonce';
 import { useSelectedAsset } from '@common/hooks/use-selected-asset';
 import { isEmpty } from '@common/utils';
+import { isTxSponsored, TransactionFormValues } from '@common/transactions/transaction-utils';
 import {
   getDefaultSimulatedFeeEstimations,
   getFeeEstimationsWithMaxValues,
-  isTxSponsored,
-  TransactionFormValues,
-} from '@common/transactions/transaction-utils';
+  useFeeEstimationsMaxValues,
+} from '@common/transactions/fee-estimations';
 import { ErrorLabel } from '@components/error-label';
 import { ShowEditNonceAction } from '@components/show-edit-nonce';
 import { FeeRow } from '@components/fee-row/fee-row';
@@ -47,7 +47,9 @@ export function SendFormInner(props: SendFormInnerProps) {
     serializedTxPayload,
     estimatedTxByteLength
   );
+
   const [, setFeeEstimations] = useFeeEstimationsState();
+  const feeEstimationsMaxValues = useFeeEstimationsMaxValues();
   const { selectedAsset } = useSelectedAsset();
   const assets = useTransferableAssets();
   const analytics = useAnalytics();
@@ -67,7 +69,8 @@ export function SendFormInner(props: SendFormInnerProps) {
       }
       if (feeEstimationsResp.estimations && feeEstimationsResp.estimations.length) {
         const feeEstimationsWithMaxValues = getFeeEstimationsWithMaxValues(
-          feeEstimationsResp.estimations
+          feeEstimationsResp.estimations,
+          feeEstimationsMaxValues
         );
         setFeeEstimations(feeEstimationsWithMaxValues);
         void analytics.track('use_fee_estimation', {

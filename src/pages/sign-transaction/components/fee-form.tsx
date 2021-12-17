@@ -2,12 +2,12 @@ import { useEffect } from 'react';
 import { useFormikContext } from 'formik';
 
 import { LoadingRectangle } from '@components/loading-rectangle';
+import { isTxSponsored, TransactionFormValues } from '@common/transactions/transaction-utils';
 import {
   getDefaultSimulatedFeeEstimations,
   getFeeEstimationsWithMaxValues,
-  isTxSponsored,
-  TransactionFormValues,
-} from '@common/transactions/transaction-utils';
+  useFeeEstimationsMaxValues,
+} from '@common/transactions/fee-estimations';
 import { FeeRow } from '@components/fee-row/fee-row';
 import { MinimalErrorMessage } from '@pages/sign-transaction/components/minimal-error-message';
 import { useFeeEstimationsQuery } from '@query/fees/fees.hooks';
@@ -33,6 +33,7 @@ export function FeeForm(): JSX.Element | null {
   const isSponsored = transaction ? isTxSponsored(transaction) : false;
 
   const [, setFeeEstimations] = useFeeEstimationsState();
+  const feeEstimationsMaxValues = useFeeEstimationsMaxValues();
 
   useEffect(() => {
     if (feeEstimationsResp) {
@@ -45,7 +46,8 @@ export function FeeForm(): JSX.Element | null {
       }
       if (feeEstimationsResp.estimations && feeEstimationsResp.estimations.length) {
         const feeEstimationsWithMaxValues = getFeeEstimationsWithMaxValues(
-          feeEstimationsResp.estimations
+          feeEstimationsResp.estimations,
+          feeEstimationsMaxValues
         );
         setFeeEstimations(feeEstimationsWithMaxValues);
         void analytics.track('use_fee_estimation', {

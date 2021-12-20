@@ -23,7 +23,7 @@ describe(`Send tokens flow`, () => {
     await walletPage.goToSendForm();
     sendForm = new SendPage(walletPage.page);
     await sendForm.waitForSendMaxButton();
-  }, 30_000);
+  }, 60_000);
 
   afterEach(async () => {
     try {

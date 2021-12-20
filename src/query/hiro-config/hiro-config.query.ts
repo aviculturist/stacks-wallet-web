@@ -26,10 +26,8 @@ interface HiroConfig {
   feeEstimations?: FeeEstimationsConfig;
 }
 
-// const GITHUB_PRIMARY_BRANCH = 'main';
-const GITHUB_PRIMARY_BRANCH = 'feat/use-wallet-config-for-max-fee-estimations/I2039';
-// const githubWalletConfigRawUrl = `https://raw.githubusercontent.com/${GITHUB_ORG}/${GITHUB_REPO}/${GITHUB_PRIMARY_BRANCH}/config/wallet-config.json`;
-const githubWalletConfigRawUrl = `http://localhost:8000/config/wallet-config.json`
+const GITHUB_PRIMARY_BRANCH = 'main';
+const githubWalletConfigRawUrl = `https://raw.githubusercontent.com/${GITHUB_ORG}/${GITHUB_REPO}/${GITHUB_PRIMARY_BRANCH}/config/wallet-config.json`;
 
 async function fetchHiroMessages(): Promise<HiroConfig> {
   return fetch(githubWalletConfigRawUrl).then(msg => msg.json());

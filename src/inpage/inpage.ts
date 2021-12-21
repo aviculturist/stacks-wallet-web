@@ -12,6 +12,8 @@ import {
   TransactionResponseMessage,
 } from '@shared/message-types';
 import { logger } from '@shared/logger';
+import { makeLocalDataKey } from '@app/common/store-utils';
+import { defaultNetworks, Network, Networks } from '@shared/constants';
 
 type CallableMethods = keyof typeof ExternalMethods;
 
@@ -60,10 +62,16 @@ const isValidEvent = (event: MessageEvent, method: MessageToContentScript['metho
   return correctSource && correctMethod && !!data.payload;
 };
 
-const provider: StacksProvider = {
+const provider: StacksProvider & { getCurrentNetwork: () => Network } = {
   getURL: async () => {
     const { url } = await callAndReceive('getURL');
     return url;
+  },
+  getCurrentNetwork: () => {
+    const storedNetworks = localStorage.getItem(makeLocalDataKey('networks'));
+    const networks: Networks = storedNetworks ? JSON.parse(storedNetworks) : defaultNetworks;
+    const currentNetworkKey: string = localStorage.getItem(makeLocalDataKey('networkKey')) || 'mainnet';
+    return networks[currentNetworkKey];
   },
   authenticationRequest: async authenticationRequest => {
     const event = new CustomEvent<AuthenticationRequestEventDetails>(

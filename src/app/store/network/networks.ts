@@ -9,6 +9,27 @@ import { transactionRequestNetwork } from '@app/store/transactions/requests';
 import { makeLocalDataKey } from '@app/common/store-utils';
 import { whenChainId } from '@app/common/transactions/transaction-utils';
 
+const networkLocalStorageWithEvents = {
+  getItem: (key: string) => {
+    return localStorage.getItem(key) || 'mainnet';
+  },
+  setItem: (key: string, networkName: string | null): void => {
+    const storedNetworks = localStorage.getItem(makeLocalDataKey('networks'));
+    const networks: Networks = storedNetworks ? JSON.parse(storedNetworks) : defaultNetworks;
+    if (networkName !== null) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        tabs[0].id &&
+          chrome.tabs.sendMessage(tabs[0].id, {
+            method: 'changeNetwork',
+            source: 'stacks-wallet',
+            message: JSON.stringify(networks[networkName]),
+          });
+      });
+      localStorage.setItem(key, networkName);
+    }
+  },
+};
+
 // Our root networks list, users can add to this list and it will persist to localstorage
 export const networksState = atomWithStorage<Networks>(
   makeLocalDataKey('networks'),
@@ -18,7 +39,11 @@ export const networksState = atomWithStorage<Networks>(
 // the current key selected
 // if there is a pending transaction request, it will default to the network passed (if included)
 // else it will default to the persisted key or default (mainnet)
-const localCurrentNetworkKeyState = atomWithStorage(makeLocalDataKey('networkKey'), 'mainnet');
+const localCurrentNetworkKeyState = atomWithStorage(
+  makeLocalDataKey('networkKey'),
+  'mainnet',
+  networkLocalStorageWithEvents
+);
 export const currentNetworkKeyState = atom<string, string>(
   get => {
     const networks = get(networksState);
